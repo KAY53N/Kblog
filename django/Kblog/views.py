@@ -11,15 +11,11 @@ from django.contrib.auth.hashers import make_password, check_password
 from PIL import Image
 from django.template import RequestContext
 from django.core.context_processors import csrf
-import sys, os, pprint, random, cgi, json, time, datetime, pytz , hashlib, magic
+import sys, os, pprint, random, cgi, json, time, datetime, pytz , hashlib, magic, glob
 try:
     import xml.etree.cElementTree as ET 
 except ImportError:
     import xml.etree.ElementTree as ET 
-
-import glob
-import os
-s = os.sep
 
 
 reload(sys)
@@ -63,7 +59,7 @@ def getThemesConfig():
                 tree = ET.parse(confPath + '/config.xml')
                 root = tree.getroot()
             except Exception, e:
-                print "Error:cannot parse file:xxx.xml."
+                print "Error:cannot parse file: config.xml"
                 print e
                 sys.exit(1)
             configList[index] = {}
@@ -83,7 +79,7 @@ def getWebInfo():
 
 def index(request):
 	url = request.get_host()
-	cid = request.GET.get('cid')
+	cid = cgi.escape(request.GET.get('cid'))
 	if isset(cid) == 0:
 		cid = 0
 	navList = getNavList()
@@ -99,7 +95,7 @@ def index(request):
 		articleList = Article.objects.raw(sql)
 		articleList = list(articleList)
 	paginator = Paginator(articleList, 5)
-	page = request.GET.get('page')
+	page = int(request.GET.get('page', 1))
 	try:
 		pagebar = paginator.page(page)
 	except PageNotAnInteger:
@@ -127,7 +123,7 @@ def index(request):
 	return render(request, getThemePath() + 'index.html', context)
 
 def detail(request):
-	aid = request.GET.get('aid')
+	aid = cgi.escape(request.GET.get('aid'))
 	url = request.get_host()
 	detail = []
 	if isset(aid):
@@ -157,7 +153,7 @@ def detail(request):
 			}
 			return render(request, 'detail.html', context)
 
-		userId = 0
+		userId = request.session['uInfo']['user_id']
 		status = Comment.objects.create(
 			user_id = int(userId),
 			nickname = cgi.escape(request.POST.get('nickname')),
@@ -201,7 +197,7 @@ def checkaccount(request):
 		count = User.objects.filter(username=val).count()
 		response_data['status'] = count
 
-	return HttpResponse(json.dumps(response_data), content_type="application/json")  
+	return HttpResponse(json.dumps(response_data), content_type='application/json')  
 
 def signup(request):
     form = None
@@ -345,20 +341,20 @@ def manage_write(request):
 
 	if request.method == 'POST':
 		currTime = getCurrTime()
-		createTime = request.POST.get('create_date') + ' ' + request.POST.get('create_time')
+		createTime = cgi.escape(request.POST.get('create_date')) + ' ' + cgi.escape(request.POST.get('create_time'))
 		articleInfo = Article.objects.create(
 			author = int(userInfo['user_id']),
-			title = request.POST.get('title'),
-			content = request.POST.get('content'),
+			title = cgi.escape(request.POST.get('title')),
+			content = cgi.escape(request.POST.get('content')),
 			look_count = 0,
 			comment_count = 0,
-			article_pic = request.POST.get('article_pic'),
+			article_pic = cgi.escape(request.POST.get('article_pic')),
 			update_time = currTime,
 			create_time = createTime,
 			created =  datetime.datetime.strftime(datetime.datetime.now(timeZone), '%Y年%m月')
 		)
 
-		categoryIdList = request.REQUEST.getlist('category')
+		categoryIdList = cgi.escape(request.REQUEST.getlist('category'))
 		for item in categoryIdList:
 			Relation.objects.create(aid=articleInfo.article_id, cid=item)
 
@@ -448,10 +444,10 @@ def manage_deletefile(request):
 	responseData = {}
 	responseData['status'] = 'faild'
 	if request.method == 'POST':
-		filename = os.path.dirname(__file__) + '/static/upload/' + request.POST.get('savepath') + request.POST.get('filename')
+		filename = os.path.dirname(__file__) + '/static/upload/' + request.POST.get('savepath').replace('.', '') + cgi.escape(request.POST.get('filename'))
 		if os.path.isfile(filename):
 			os.remove(filename)
-			Attachment.objects.filter(savename=request.POST.get('filename')).delete()
+			Attachment.objects.filter(savename=cgi.escape(request.POST.get('filename'))).delete()
 			responseData['status'] = 'success'
 	return HttpResponse(json.dumps(responseData), content_type='application/json')
 
@@ -477,7 +473,7 @@ def manage_article(request):
 	articleList = list(Article.objects.raw(sql))
 
 	paginator = Paginator(articleList, 10)
-	page = request.GET.get('page')
+	page = int(request.GET.get('page', 1))
 	try:
 		pagebar = paginator.page(page)
 	except PageNotAnInteger:
@@ -492,7 +488,7 @@ def manage_article(request):
 	return render(request, manageThemeDir + 'manage_article.html', context)
 
 def manage_delarticle(request):
-	idList = request.REQUEST.getlist('idlist')
+	idList = cgi.escape(request.REQUEST.getlist('idlist'))
 	if len(idList) > 0:
 		Article.objects.filter(article_id__in=idList).delete()
 		Relation.objects.filter(aid__in=idList).delete()
@@ -501,25 +497,25 @@ def manage_delarticle(request):
 
 def manage_editarticle(request):
 	context = {}
-	aid = request.GET.get('aid')
+	aid = cgi.escape(request.GET.get('aid'))
 	url = request.get_host()
 	userInfo = request.session.get('uInfo', False)
 	
 	if request.method == 'POST':
 		updateArticle = Article.objects.get(article_id=aid)
 		
-		createTime = request.POST.get('create_date') + ' ' + request.POST.get('create_time')
+		createTime = cgi.escape(request.POST.get('create_date')) + ' ' + cgi.escape(request.POST.get('create_time'))
 		
 		updateArticle.author = int(userInfo['user_id'])
-		updateArticle.title = request.POST.get('title')
-		updateArticle.content = request.POST.get('content')
+		updateArticle.title = cgi.escape(request.POST.get('title'))
+		updateArticle.content = cgi.escape(request.POST.get('content'))
 		updateArticle.article_pic = request.POST.get('article_pic')
 		updateArticle.update_time = getCurrTime()
 		updateArticle.create_time = createTime
 		updateArticle.save()
 
 		Relation.objects.filter(aid=aid).delete()
-		categoryIdList = request.REQUEST.getlist('category')
+		categoryIdList = cgi.escape(request.REQUEST.getlist('category'))
 		for item in categoryIdList:
 			Relation.objects.create(aid=aid, cid=item)
 
@@ -548,13 +544,10 @@ def manage_editarticle(request):
 def manage_comment(request):
 	context = {}
 
-	status = request.GET.get('status')
-	if status == None:
-		status = 'pass'
-	
-	updateStatus = request.GET.get('update_status')
-	cid = request.GET.get('cid')
-	if updateStatus != None:
+	status = cgi.escape(request.GET.get('status', 'pass'))
+	updateStatus = cgi.escape(request.GET.get('update_status', ''))
+	cid = int(request.GET.get('cid', 0))
+	if updateStatus != '' and cid != 0:
 		res = False
 		if updateStatus == 'delete':
 			res = Comment.objects.filter(comment_id=cid).delete()
@@ -577,7 +570,7 @@ def manage_comment(request):
 		commentList = Comment.objects.filter(status='waiting').order_by('-comment_id').all()
 
 	paginator = Paginator(commentList, 10)
-	page = request.GET.get('page')
+	page = int(request.GET.get('page', 1))
 	try:
 		pagebar = paginator.page(page)
 	except PageNotAnInteger:
@@ -605,7 +598,7 @@ def manage_comment(request):
 	return render(request, manageThemeDir + 'manage_comment.html', context)
 
 def manage_delcomment(request):
-	idList = request.REQUEST.getlist('idlist')
+	idList = cgi.escape(request.REQUEST.getlist('idlist'))
 	if len(idList) > 0:
 		Comment.objects.filter(comment_id__in=idList).delete()
 		return HttpResponse('delete success')
@@ -617,7 +610,7 @@ def manage_category(request):
 	'''
 	categoryList = Category.objects.all()
 	paginator = Paginator(categoryList, 10)
-	page = request.GET.get('page')
+	page = int(request.GET.get('page', 1))
 	try:
 		pagebar = paginator.page(page)
 	except PageNotAnInteger:
@@ -645,7 +638,7 @@ def manage_addcategory(request):
 		currPath = str(pidInfo.path) + '-' + str(pidInfo.category_id)
 		
 		Category.objects.create(
-			name = request.POST.get('name'),
+			name = cgi.escape(request.POST.get('name')),
 			pid = chosenPid,
 			path = currPath
 		)
@@ -661,7 +654,7 @@ def manage_addcategory(request):
 
 def manage_editcategory(request):
 	context = {}
-	cid = request.GET.get('cid')
+	cid = int(request.GET.get('cid'))
 	detail = Category.objects.get(category_id=cid)
 	if detail.pid > 0:
 		detail.pname = Category.objects.get(category_id=detail.pid).name
@@ -673,7 +666,7 @@ def manage_editcategory(request):
 	return render(request, manageThemeDir + 'manage_editcategory.html', context)
 
 def manage_delcategory(request):
-	idList = request.REQUEST.getlist('idlist')
+	idList = cgi.escape(request.REQUEST.getlist('idlist'))
 	if len(idList) > 0:
 		Category.objects.filter(category_id__in=idList).delete()
 		return HttpResponse('delete success')
@@ -696,7 +689,7 @@ def manage_attachment(request):
 	attachmentList = list(attachmentList)
 
 	paginator = Paginator(attachmentList, 10)
-	page = request.GET.get('page')
+	page = int(request.GET.get('page', 1))
 	try:
 		pagebar = paginator.page(page)
 	except PageNotAnInteger:
@@ -716,7 +709,7 @@ def manage_attachment(request):
 	return render(request, manageThemeDir + 'manage_attachment.html', context)
 
 def manage_delattachment(request):
-	idList = request.REQUEST.getlist('idlist')
+	idList = cgi.escape(request.REQUEST.getlist('idlist'))
 	if len(idList) > 0:
 		Attachment.objects.filter(attrch_id__in=idList).delete()
 		return HttpResponse('delete success')
@@ -732,7 +725,7 @@ def manage_user(request):
 		userList = User.objects.all()
 
 	paginator = Paginator(userList, 10)
-	page = request.GET.get('page')
+	page = int(request.GET.get('page', 1))
 	try:
 		pagebar = paginator.page(page)
 	except PageNotAnInteger:
@@ -768,14 +761,14 @@ def manage_adduser(request):
 
 def manage_edituser(request):
 	context = {}
-	uid = request.GET.get('uid')
+	uid = int(request.GET.get('uid'))
 	
 	if request.method == 'POST':
-		updateUser = User.objects.get(user_id=request.POST.get('uid'))
+		updateUser = User.objects.get(user_id=int(request.POST.get('uid')))
 		if request.POST.get('password') != '':
 			updateUser.password = make_password(cgi.escape(request.POST.get('password')), None, 'pbkdf2_sha256')
 		
-		updateUser.email = request.POST.get('email')
+		updateUser.email = cgi.escape(request.POST.get('email'))
 		updateUser.group = cgi.escape(request.POST.get('group'))
 		updateUser.status = cgi.escape(request.POST.get('status'))
 		updateUser.save()
@@ -792,7 +785,7 @@ def manage_edituser(request):
 	return render(request, manageThemeDir + 'manage_edituser.html', context)
 
 def manage_deluser(request):
-	idList = request.REQUEST.getlist('idlist')
+	idList = cgi.escape(request.REQUEST.getlist('idlist'))
 	if len(idList) > 0:
 		User.objects.filter(user_id__in=idList).delete()
 		return HttpResponse('delete success')
@@ -807,17 +800,17 @@ def manage_themes(request):
 
 def manage_uptheme(request):
     opt = Options.objects.get(name='theme')
-    opt.value = request.POST.get('change')
+    opt.value = cgi.escape(request.POST.get('change'))
     opt.save()
     return HttpResponseRedirect('/manage_themes/')
 
 def manage_edittheme(request):
     if request.GET.get('file'):
-        fileName = request.GET.get('file').replace('..', '').replace('/', '').replace('%', '')
+        fileName = cgi.escape(request.GET.get('file').replace('..', '').replace('/', '').replace('%', ''))
     else:
         fileName = 'index.html'
     if request.GET.get('theme'):
-        themeDir = 'themes/' + request.GET.get('theme') + '/'
+        themeDir = 'themes/' + cgi.escape(request.GET.get('theme').replace('.', '')) + '/'
     else:
         themeDir = getThemePath()
 
@@ -841,8 +834,8 @@ def manage_edittheme(request):
     return render(request, manageThemeDir + 'manage_edittheme.html', context)
 def manage_writefile(request):
     if request.method == 'POST':
-        themeDir = request.POST.get('themeDir')
-        f = open(os.path.split(os.path.realpath(__file__))[0] + '/templates/' + themeDir + request.POST.get('file'), 'w')
+        themeDir = cgi.escape(request.POST.get('themeDir').replace('.', ''))
+        f = open(os.path.split(os.path.realpath(__file__))[0] + '/templates/' + themeDir + cgi.escape(request.POST.get('file')), 'w')
         f.write(request.POST.get('content'))
         f.close()
     return HttpResponse('ok')
@@ -867,8 +860,8 @@ def manage_option(request):
         for key,val in request.POST.iteritems():
             if key != 'csrfmiddlewaretoken':
                 #sql += 'INSERT INTO "' + Meta.db_table + '_options" VALUES(\'' + key + '\', \'' + val + '\') ON DUPLICATE KEY UPDATE value=\'' + val + '\';'
-                options = Options.objects.get(name=key)
-                options.value = val
+                options = Options.objects.get(name=cgi.escape(key))
+                options.value = cgi.escape(val)
                 options.save()
         return HttpResponse('success')
     detail = Options.objects.exclude(name__contains='theme')
@@ -884,6 +877,4 @@ def getCurrTime():
 	return datetime.datetime.strftime(datetime.datetime.now(timeZone), '%Y-%m-%d %H:%M:%S')
 
 def test(request):
-    themeDir = request.POST.get('themeDir')
-    f = os.path.split(os.path.realpath(__file__))[0] + '/templates/' + themeDir + request.POST.get('file')
-    return HttpResponse(themeDir)
+    return HttpResponse('...')
