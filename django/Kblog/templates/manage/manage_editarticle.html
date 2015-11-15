@@ -1,0 +1,195 @@
+{% include 'manage/manage_header.html' %}
+	<!-- Codemirror 和 marked 依赖 -->
+	<link rel="stylesheet" href="/static/codemirror/lib/codemirror.css">
+    <script src="/static/js/jquery.cookie.js"></script>
+	<script src="/static/codemirror/lib/codemirror.js"></script>
+	<script src="/static/codemirror/mode/markdown/markdown.js"></script>
+	<script src="/static/codemirror/addon/mode/overlay.js"></script>
+	<script src="/static/codemirror/mode/xml/xml.js"></script>
+	<script src="/static/codemirror/mode/gfm/gfm.js"></script>
+	<script src="/static/js/marked.min.js"></script>
+
+	<!-- HTML 编辑器的 CSS 与 JavaScript -->
+	<link rel="stylesheet" href="/static/uikit/css/components/htmleditor.css">
+	<script src="/static/uikit/js/components/htmleditor.js"></script>
+	<script src="/static/uikit/js/components/upload.min.js"></script>
+
+	<script src="/static/uikit//js/components/autocomplete.js"></script>
+	<script src="/static/uikit/js/components/timepicker.js"></script> 
+
+	<div class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
+	<form class="uk-form uk-form-stacked" method="POST" action="">
+		<h3 class="tm-article-subtitle">修改文章</h3>
+		<div style="width:70%" class="fl">
+			<div class="uk-form-row">
+				<div class="uk-form-controls">
+					<input type="text" placeholder="标题" id="form-h-ip" class="uk-form-width-large" name="title" value="{{detail.title}}" />
+				</div>
+			</div>
+			<div class="uk-form-row">
+				<textarea id="content" name="content" data-uk-htmleditor="{markdown:true, mode:'split', maxsplitsize:800, lblPreview:'预览', lblCodeview:'撰写'}">{{detail.content}}</textarea>
+			</div>
+
+			<div class="uk-form-row">
+				<div class="uk-form-controls">
+					<button type="submit" class="uk-button uk-button-success">提交</button>
+				</div>
+			</div>
+			{% csrf_token %}
+		</div>
+		<div class="fr" style="width:25%">
+			<ul data-uk-switcher="{connect:'#subnav-pill-content-2'}" class="uk-tab uk-text-center">
+				<li aria-expanded="true" class="uk-active uk-width-1-2"><a href="javascript:void(0)">选项</a></li>
+				<li aria-expanded="false" class="uk-width-1-2"><a href="javascript:void(0)">附件&nbsp;&nbsp;<div class="uk-badge">12</div></a></li>
+			</ul>
+
+			<ul class="uk-switcher uk-margin" id="subnav-pill-content-2">
+				<li aria-hidden="true" class="uk-active">
+					<div class="uk-form-row">
+						<div class="uk-form-controls">
+							<label class="uk-form-label">发布日期</label>
+							<input type="text" name="create_date" data-uk-datepicker="{format:'YYYY-MM-DD'}" style="width:130px" value="{{detail.create_date}}" />&nbsp;&nbsp;&nbsp;&nbsp;
+							<input type="text" name="create_time" data-uk-timepicker="{format:'24h'}" style="width:130px;" value="{{detail.create_time}}" />
+						</div>
+
+						<div class="uk-form-controls mt20">
+							<label class="uk-form-label">缩略图</label>
+							<input type="text" name="article_pic" placeholder="" class="uk-width-1-1" value="{{detail.article_pic}}" />
+						</div>
+
+						<div class="uk-form-controls mt20">
+							<label class="uk-form-label">分类</label>
+							{% for item in categoryList %}
+							<div class="mt05">
+								{{item.count|safe}}<label><input type="checkbox" name="category" value="{{item.category_id}}" {% for it in activeCategory %}{% if it.cid == item.category_id %}checked="checked"{% endif %}{% endfor %} />&nbsp;{{item.name}}</label>
+							</div>
+							{% endfor %}
+						</div>
+					</div>
+				</li>
+				<li aria-hidden="false">
+					<div id="progressbar" class="uk-progress uk-hidden">
+						<div class="uk-progress-bar" style="width: 0%;">0%</div>
+					</div>
+
+					<div class="uk-placeholder uk-text-center" id="upload-drop">
+						<i class="uk-icon-cloud-upload uk-icon-medium uk-text-muted uk-margin-small-right"></i> 将文件拖拽至此<br />或者 <a class="uk-form-file">选择一个文件<input type="file" id="upload-select" name="upfile"></a>.
+						<hr class="mt20" style="border:none;border-top:1px dashed #ccc">
+						<ul class="uk-list uk-list-line mt10 ta_l pb10 uk-scrollable-text" id="picList" style="height:400px">
+							{% for item in attachmentList %}
+								<li class="fileli">
+								<a url="{{url}}/static/upload/{{item.savepath}}{{item.savename}}" href="javascript:void(0)" class="des text_overflow">{{item.original_name}}</a>
+								<div>{{item.size}}<a savename="{{item.savename}}" savepath="{{item.savepath}}" href="javascript:void(0)" class="uk-icon-close uk-text-danger ml15 delete_file"></a></div>
+								</li>
+							{% endfor %}
+						</ul>
+
+					</div>
+				</li>
+			</ul>
+		</div>
+		{% csrf_token %}
+	</form>
+	</div>
+
+	<a href="#upfileDialog" id="dialogBtn" class="uk-hiddens" data-uk-modal></a>
+
+	<div id="upfileDialog" class="uk-modal">
+		<div class="uk-modal-dialog" style="background:#f6f6f3">
+			<a class="uk-modal-close uk-close"></a>
+			<form action="" method="" class="uk-form">
+				<h3>插入图片</h3>
+				<p class="uk-text-warning">暂不支持图片插入，请复制图片地址使用</p>
+				<P><input type="text" placeholder="" id="insertPicUrl" class="uk-width-1-1" value="http://loc.test.com/xxx/aaa/d1/1111.jpg"></p>
+			</form>
+		</div>
+	</div>
+
+<script>
+	function csrfSafeMethod(method)
+	{
+		// these HTTP methods do not require CSRF protection
+		return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+	}
+	$.ajaxSetup({
+		beforeSend: function(xhr, settings){
+			if(!csrfSafeMethod(settings.type) && !this.crossDomain)
+			{
+				xhr.setRequestHeader("X-CSRFToken", $.cookie('csrftoken'));
+			}
+		}
+	});
+	var progressbar = $("#progressbar"),
+		bar         = progressbar.find('.uk-progress-bar'),
+		settings    = {
+
+			action: '/manage_upload/', // 上传路径 url
+
+			allow : '*.(jpg|jpeg|gif|png)', // 只允许上传图片
+			
+			single: true,
+
+			param : 'upfile',
+
+			params : {'csrfmiddlewaretoken':$.cookie('csrftoken')},
+		
+			loadstart: function() {
+				bar.css("width", "0%").text("0%");
+				progressbar.removeClass("uk-hidden");
+			},
+
+			progress: function(percent) {
+				percent = Math.ceil(percent);
+				bar.css("width", percent+"%").text(percent+"%");
+			},
+
+			complete: function(response) {
+				var data = $.parseJSON(response);
+				//$('#dialogBtn').trigger('click');
+				//$('#insertPicUrl').val(data.url);
+				$('#picList').prepend('<li class="fileli"><a class="des" href="javascript:void(0)" url="' + data.url + '">' + data.fileName + '</a><div>' + data.fileSize + '<a class="uk-icon-close uk-text-danger ml15 delete_file" href="javascript:void(0)" saveName="' + data.savename + '" savepath="' + data.savepath + '"></a></div></li>');
+			},
+
+			allcomplete: function(response) {
+
+				bar.css("width", "100%").text("100%");
+
+				setTimeout(function(){
+					progressbar.addClass("uk-hidden");
+				}, 250);
+
+				var data = $.parseJSON(response);
+				$('#insertPicUrl').val(data.url);
+				//$('#dialogBtn').trigger('click');
+			}
+		};
+
+	var select = UIkit.uploadSelect($("#upload-select"), settings),
+		drop   = UIkit.uploadDrop($("#upload-drop"), settings);
+
+	$(document).on('click', '.delete_file', function(){
+		var saveName = $(this).attr('savename');
+		var savePath = $(this).attr('savePath');
+		var fileName = $(this).parent().parent().find('.des').text();
+  		var conFirm = confirm('确认要删除文件 ' + fileName + ' 吗?');
+  		if(conFirm == true)
+    	{
+			$.post('/manage_deletefile/', {filename:saveName, savepath:savePath}, function(json){
+				if(json.status == 'success')
+				{
+					$(this).parent('.fileli').detach();
+				}
+			}, 'json')
+			$(this).parents('.fileli').detach();
+		}
+	});
+
+	$(document).on('click', '.fileli > .des', function(){
+		var url = $(this).attr('url');
+		$('#insertPicUrl').val(url);
+		$('#dialogBtn').trigger('click');
+	})
+</script>
+
+</body>
+</html>

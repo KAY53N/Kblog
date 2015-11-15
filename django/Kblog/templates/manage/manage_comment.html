@@ -1,0 +1,92 @@
+{% include 'manage/manage_header.html' %}
+	<style>
+	.commenttr td {
+		vertical-align:middle;
+	}
+	</style>
+	<script>{{msg|safe}}</script>
+	<div class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
+		<h3 class="tm-article-subtitle">管理评论</h3>
+		
+		<ul class="uk-tab mb15 data_tab" data-uk-tab>
+			<li {% if status == 'pass' %}class="uk-active"{% endif %}><a href="/manage_comment/?status=pass">已通过</a></li>
+			<li {% if status == 'check' %}class="uk-active"{% endif %}><a href="/manage_comment/?status=check">待审核</a></li>
+		</ul>
+
+		<input type="checkbox" id="chosenAll">
+		<div class="uk-button-group">
+			<button class="uk-button">选中项</button>
+			<div data-uk-dropdown="{mode:'click'}">
+				<button class="uk-button"><i class="uk-icon-caret-down"></i></button>
+				<div class="uk-dropdown uk-dropdown-small">
+					<ul class="uk-nav uk-nav-dropdown">
+						<li><a id="delFormBtn">删除</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<span class="fr">
+			<form action="" method="GET">
+			<input type="text" placeholder="" name="word" />&nbsp;<button type="submit" class="uk-button"><i class="uk-icon-search"></i>搜索</button>&nbsp;
+			</form>
+		</span>
+
+		<table class="uk-table uk-table-hover uk-table-striped uk-table-condensed">
+			<tr>
+				<th width="5%"></th>
+				<th>作者</th>
+				<th>内容</th>
+			</tr>
+
+			<form id="delForm" class="uk-form" method="POST" action="/manage_delcomment/">
+			{% if pagebar %}
+				{% for item in pagebar %}
+				<tr height="35" class="commenttr">
+					<td><input type="checkbox" name="idlist" class="idlist" value="{{item.comment_id}}" /></td>
+					<td><img width="50" height="50" alt="" src="/static/images/avatars/{{item.avatar}}" class="uk-comment-avatar">&nbsp;{{item.nickname}}</td>
+					<td>
+						<div class="uk-visible-hover">
+						{{item.create_time|date:'m月d日'}} 于 <a>{{item.article}}</a> <div class="word_wrap mt10" style="width:300px">{{item.comment}}</div>
+							<div class="uk-hidden">
+								{% if status == 'pass' %}通过{% else %}<a href="/manage_comment/?status={{status}}&update_status=approved&cid={{item.comment_id}}">通过</a>{% endif %}
+								{% if status == 'check' %}待审核{% else %}<a href="/manage_comment/?status={{status}}&update_status=waiting&cid={{item.comment_id}}">待审核</a>{% endif %}
+								<a class="uk-text-danger" href="/manage_comment/?status={{status}}&update_status=delete&cid={{item.comment_id}}">删除</a>
+							</div>
+						</div>				
+					</td>
+				</tr>
+				{% endfor %}
+			{% endif %}
+			{% csrf_token %}
+			</form>
+		</table>
+
+		<ul class="uk-pagination">
+			{% if pagebar.has_previous %}
+				<li><a href="?page={{ pagebar.previous_page_number }}">上一页</a></li>
+			{% endif %}
+
+			<li class="uk-active">
+				当前：{{ pagebar.number }} / {{ pagebar.paginator.num_pages }}
+			</li>
+			<li class="has_other_pages()"></li>
+			{% if pagebar.has_next %}
+				<li><a href="?page={{ pagebar.next_page_number }}">下一页</a></li>
+			{% endif %}
+		</ul>
+	</div>
+
+	<script>
+	$('#chosenAll').change(function(){
+		$('.idlist').prop('checked', $(this).is(':checked'));
+	});
+	$('#delFormBtn').click(function(){
+		$('#delForm').submit();
+	});
+
+	$('.data_tab a').click(function(){
+		window.location.href=$(this).attr('href');
+	})
+	</script>
+</body>
+</html>

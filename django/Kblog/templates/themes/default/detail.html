@@ -1,0 +1,102 @@
+{% include 'themes/default/Public/header.html' %}
+	<script>{{msg|safe}}</script>
+	
+	<!-- Codemirror 和 marked 依赖 -->
+	<link rel="stylesheet" href="/static/codemirror/lib/codemirror.css">
+    <script src="/static/js/jquery.cookie.js"></script>
+	<script src="/static/codemirror/lib/codemirror.js"></script>
+	<script src="/static/codemirror/mode/markdown/markdown.js"></script>
+	<script src="/static/codemirror/addon/mode/overlay.js"></script>
+	<script src="/static/codemirror/mode/xml/xml.js"></script>
+	<script src="/static/codemirror/mode/gfm/gfm.js"></script>
+	<script src="/static/js/marked.min.js"></script>
+	<script type="text/html" id="content">{{detail.content}}</script>
+
+
+<div class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
+	<article class="uk-article">
+		<h1 class="uk-article-title">{{detail.title}}</h1>
+		<p class="uk-article-meta">{{detail.author}} by {{detail.author}} on {{detail.create_time}}. Posted in <a href="/">Blog</a></p>
+		<p><img src="http://{{ url }}/{{ detail.article_pic|cut:"Kblog/" }}"></p>
+		<div class="word_wrap"><script>document.write(marked($('#content').html()));</script></div>
+	</article>
+
+	<h3 class="uk-h2 tm-article-subtitle">评论内容</h3>
+	<ul class="uk-comment-list">
+		{% autoescape on %}
+		{{commentHtml|safe}}
+		{% endautoescape %}
+	</ul>
+
+	<form action="" method="POST" class="uk-form uk-form-stacked mt40">
+		<h3 class="uk-h2 tm-article-subtitle" id="replyTit">发表评论</h3>
+		<div class="padding_10 clearfix ta_c">
+			<span class="mr30 fl"><label><img src="/static/images/avatars/avatar.png"><br /><input type="radio" name="avatar" value="avatar.png" checked="checked"></label></span>
+			<span class="mr30 fl"><label><img src="/static/images/avatars/avatar1.png"><br /><input type="radio" name="avatar" value="avatar1.png"></label></span>
+			<span class="mr30 fl"><label><img src="/static/images/avatars/avatar3.png"><br /><input type="radio" name="avatar" value="avatar3.png"></label></span>
+			<span class="mr30 fl"><label><img src="/static/images/avatars/avatar4.png"><br /><input type="radio" name="avatar" value="avatar4.png"></label></span>
+			<span class="mr30 fl"><label><img src="/static/images/avatars/avatar5.png"><br /><input type="radio" name="avatar" value="avatar5.png"></label></span>
+		</div>
+		<div class="clearfix"></div>
+		{% if not username %}
+		<div class="uk-form-row">
+		{% else %}
+		<div class="uk-form-row uk-hidden">
+		{% endif %}
+			<div class="uk-form-controls">
+				<input type="text" placeholder="请输入昵称" name="nickname" class="uk-form-width-large" value="{{username}}" maxlength="15">
+				{% for error in form.nickname.errors %}<label class="error">{{ error }}</label>{% endfor %}
+			</div>
+		</div>
+		<div class="uk-form-row" id="commentForm">
+			<div class="uk-form-controls">
+				<textarea rows="5" cols="70" placeholder="请输入评论内容" id="form-h-t" class="uk-width-1-1" name="comment" maxlength="200" style="width: 802px; height: 90px;"></textarea>
+				{% for error in form.comment.errors %}<label class="error">{{ error }}</label>{% endfor %}
+			</div>
+		</div>
+
+		<div class="uk-form-row">
+			<div class="uk-form-controls">
+				<input type="hidden" name="pid" id="pid" value="0">
+				<button class="uk-button uk-button-primary">Submit</button>
+			</div>
+		</div>
+	</div>
+	{% csrf_token %}
+	</form>
+</div>
+
+{% include 'themes/default/Public/footer.html' %}
+
+<script>
+$(function(){
+	$('.reply').click(function(){
+		var nickname = $(this).attr('nickname');
+		$('#replyTit').html('回复[ ' + nickname + ']的评论：<a href="javascript:void(0)" class="uk-close" id="replyClose"></a>');
+		$('#pid').val($(this).attr('id'));
+	});
+	$(document).on('click', '#replyClose', function(){
+		//$('html,body').animate({scrollTop:$('#commentForm').offset().top}, 1000);
+		$('#replyTit').html('发表评论');
+		$('#pid').val('0');
+		return true;
+	})
+	$('form').validate({
+		messages: vMessage,
+		rules: {
+			nickname: {
+				required: true,
+				minlength: 2
+			},
+			comment: {
+				required: true,
+				minlength: 5
+			}
+		},
+		errorPlacement: function(error, element) {  
+			error.appendTo(element.parent());  
+		}
+	});
+	//$('#content').html(marked($('#content').html()));
+})
+</script>

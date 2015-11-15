@@ -1,0 +1,135 @@
+{% include 'themes/default/Public/header.html' %}
+
+	<div class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
+        {% if error %}
+		<div class="uk-alert uk-alert-danger margin_20_200">{{error}}</div>
+		{% endif %}
+		<div class="uk-panel uk-panel-box padding_40 margin_20_200">
+			<h3 class="uk-panel-title" style="margin-top:-20px">注册</h3>
+				<form class="uk-form uk-form-horizontal" method="POST" action="">
+				<div class="uk-form-row">
+					<label for="form-user" class="uk-form-label">用户名：</label>
+					<div class="uk-form-controls">
+						<input type="text" placeholder="请输入用户名" id="account" name="username" class="uk-form-width-large" maxlength="30">
+						{% for error in form.username.errors %}<label class="error">{{ error }}</label>{% endfor %}
+					</div>
+				</div>
+				<div class="uk-form-row">
+					<label for="form-email" class="uk-form-label">Email：</label>
+					<div class="uk-form-controls">
+						<input type="email" placeholder="请输入Email" name="email" class="uk-form-width-large" maxlength="30">
+						{% for error in form.email.errors %}<label class="error">{{ error }}</label>{% endfor %}
+					</div>
+				</div>
+				<div class="uk-form-row">
+					<label for="form-pwd" class="uk-form-label">密码：</label>
+					<div class="uk-form-controls">
+					<div class="uk-form-password">
+						<input type="password" placeholder="请输入密码" id="upwd" name="upwd" class="uk-form-width-large" maxlength="16">
+						{% for error in form.upwd.errors %}<label class="error">{{ error }}</label>{% endfor %}
+        				<a href="" class="uk-form-password-toggle" data-uk-form-password>Show</a>
+					</div>
+					</div>
+				</div>
+				<div class="uk-form-row">
+					<label for="form-repwd" class="uk-form-label">确认密码：</label>
+					<div class="uk-form-controls">
+					<div class="uk-form-password">
+						<input type="password" placeholder="请再次输入密码" name="repwd" class="uk-form-width-large" maxlength="16">
+						{% for error in form.repwd.errors %}<label class="error">{{ error }}</label>{% endfor %}
+        				<a href="" class="uk-form-password-toggle" data-uk-form-password>Show</a>
+					</div>
+					</div>
+				</div>
+
+				<div class="uk-form-row">
+					<label for="id_captcha" class="uk-form-label">验证：</label>
+					<div class="uk-form-controls">
+						<fieldset data-uk-margin>
+						<input type="text" placeholder="请输入验证码" name="code" maxlength="4">
+						{% for error in form.code.errors %}<label class="error">{{ error }}</label>{% endfor %}
+						<img src="/code/" onclick="this.src='/code/?i='+Math.random()" class="verify">
+						<a class="J-changeCheckcode" href="javascript:void(0)" style="color:blue">看不清，换一张</a>
+						</fieldset>
+					</div>
+				</div>
+
+				<div class="uk-form-row">
+					<div class="uk-form-controls">
+						<button id="submit" class="uk-button uk-button-success fr" type="submit">注册</button>
+					</div>
+				</div>
+				<input type="hidden" id="accountErr" value="">
+				{% csrf_token %}
+				</form>
+		</div>
+
+    </div>
+
+{% include 'themes/default/Public/footer.html' %}
+<script>
+$('form').validate({
+		messages: vMessage,
+		rules: {
+			username: {
+				required: true,
+				minlength: 5
+			},
+			email: {
+				required: true,
+				email: true
+			},
+			upwd: {
+				required: true,
+				minlength: 6
+			},
+			repwd: {
+				required: true,
+				minlength: 6,
+				equalTo:'#upwd'
+			},
+			code: {
+				required: true,
+                minlength:4
+			}
+		},
+		errorPlacement: function(error, element) {  
+			error.appendTo(element.parent());  
+		}
+});
+
+$('#account').change(function(){
+	value = $.trim($(this).val());
+	$.getJSON('/checkaccount/', {val:value}, function(json){
+		if(json.status > 0)
+		{
+			$('.accountMsg').detach();
+			$('#account').after('<label class="accountMsg error">用户名已经存在</label>');
+			$('#accountErr').val('1');
+		}
+		else
+		{
+			$('.accountMsg').detach();
+			$('#accountErr').val('');
+		}
+	});
+});
+
+$('form').submit(function(){
+	var submitStatus = $('form').valid(); 
+	if(submitStatus == true)
+	{
+		if($('#accountErr').val().length > 0)
+		{
+			$('.accountMsg').detach();
+			$('#account').after('<label class="accountMsg error">用户名已经存在</label>');
+			return false;
+		}
+		return true;
+	}
+});
+
+$('input').focusin(function(){
+	$('.uk-alert').detach();
+});
+</script>

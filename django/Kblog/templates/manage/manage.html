@@ -1,0 +1,28 @@
+{% include 'manage/manage_header.html' %}
+
+	<div class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
+		<h3>目前有 {{articleCount}} 篇文章, 并有 {{commentCount}}  条评论. </h3><br />
+
+		<div data-uk-grid-margin="" class="uk-grid">
+			<div class="uk-width-medium-1-2">
+				<div class="uk-panel uk-panel-box">
+					<h3 class="uk-panel-title">最近发布的文章</h3><hr />
+					{% for item in articleList %}
+					<p>{{item.article_id}}. {{item.title}}<p>
+					{% endfor %}
+				</div>
+			</div>
+			<div class="uk-width-medium-1-2">
+				<div class="uk-panel uk-panel-box">
+					<h3 class="uk-panel-title">最新评论</h3><hr />
+					{% for item in commentList %}
+					<p>{{item.comment_id}}. {{item.comment|slice:"20"}}<p>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+</body>
+</html>
