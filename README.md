@@ -1,14 +1,14 @@
 # Kblog
 **The easy way to learn web frameworks**
 
-### Supported frameworks
+#### Supported frameworks
 
-#### Python
+**Python**
   * [Django](https://github.com/kaysen820/Kblog/tree/master/django)
   * Flask
   * Webpy
 
-#### PHP
+**PHP**
   * Laravel
   * ThinkPHP
   * Yii
@@ -16,15 +16,15 @@
   * CakePHP
   * Zend Framework
 
-#### Ruby
+**Ruby**
   * Ruby on Rails
 
-#### Javascript (node.js)
+**Javascript (node.js)**
   * Express
 
-### Application overview
+#### Application overview
 .....<br>
 
-### Contacts
+#### Contacts
   * Email: kaysen820@gmail.com
 <br><br>
