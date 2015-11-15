@@ -74,6 +74,13 @@ def getThemesConfig():
             index += 1
     return configList
 
+def getWebInfo():
+    detail = Options.objects.exclude(name__contains='theme')
+    newDetail = {}
+    for val in detail:
+        newDetail[val.name] = val.value
+    return newDetail
+
 def index(request):
 	url = request.get_host()
 	cid = request.GET.get('cid')
@@ -112,7 +119,9 @@ def index(request):
         'categoryList':categoryList,
 		'contentDateList':contentDateList,
 		'pagebar':pagebar,
-		'themeDir':getThemePath()
+		'webInfo' : getWebInfo(),
+		'themeHeader':getThemePath() + '/Public/header.html',
+		'themeFooter':getThemePath() + '/Public/footer.html'
 	}
 
 	return render(request, getThemePath() + 'index.html', context)
@@ -176,7 +185,9 @@ def detail(request):
 		'detail':detail,
 		'navList':navList,
 		'url':url,
-		'commentHtml':commentHtml
+		'commentHtml':commentHtml,
+		'themeHeader':getThemePath() + '/Public/header.html',
+		'themeFooter':getThemePath() + '/Public/footer.html'
 	}
 
 	return render(request, getThemePath() + 'detail.html', context)
@@ -194,6 +205,10 @@ def checkaccount(request):
 
 def signup(request):
     form = None
+    context = {
+    	'themeHeader':getThemePath() + '/Public/header.html',
+		'themeFooter':getThemePath() + '/Public/footer.html'
+    }
     if request.method == 'POST':
         _code = request.POST.get('code') or ''
         if not _code:
@@ -201,8 +216,8 @@ def signup(request):
         ca = Captcha(request)
         if not ca.check(_code):
             return render(request, 'signup.html', {'error':'验证码错误'})
-        form = SignupForm(request.POST)
-        if form.is_valid():
+        context['form'] = SignupForm(request.POST)
+        if context['form'].is_valid():
 			exists = User.objects.filter(username=cgi.escape(request.POST.get('username'))).count()
 			if exists > 0:
 				return render(request, 'signup.html', {'error':'用户名已存在'})
@@ -215,9 +230,9 @@ def signup(request):
 			)
 			return HttpResponse('Success')
         else:
-	        return render(request, getThemePath() + 'signup.html', {'form':form})
+	        return render(request, getThemePath() + 'signup.html', context)
     else:
-	    return render(request, getThemePath() + 'signup.html')
+	    return render(request, getThemePath() + 'signup.html', context)
 
 def signin(request):
 	url = request.get_host()
@@ -245,15 +260,20 @@ def signin(request):
 	else:
 		context = {
 			'navList':navList,
-			'url':url
+			'url':url,
+            'themeHeader':getThemePath() + '/Public/header.html',
+            'themeFooter':getThemePath() + '/Public/footer.html'
 		}
 		return render(request, getThemePath() + 'signin.html', context)
 
 def logout(request):
-	if request.session.get('uInfo', False) != False:
-		del request.session['uInfo']
-
-	return render(request, getThemePath() + 'logout.html')
+    if request.session.get('uInfo', False) != False:
+        del request.session['uInfo']
+    context = {
+        'themeHeader':getThemePath() + '/Public/header.html',
+        'themeFooter':getThemePath() + '/Public/footer.html'
+    }
+    return render(request, getThemePath() + 'logout.html', context)
 
 def comment_post(request):
 	return HttpResponseRedirect('/')
@@ -815,10 +835,17 @@ def manage_edittheme(request):
     context = {
         'content':content,
         'fileList':fileList,
-		'fileName':fileName
+		'fileName':fileName,
+        'themeDir':themeDir
     }
     return render(request, manageThemeDir + 'manage_edittheme.html', context)
-
+def manage_writefile(request):
+    if request.method == 'POST':
+        themeDir = request.POST.get('themeDir')
+        f = open(os.path.split(os.path.realpath(__file__))[0] + '/templates/' + themeDir + request.POST.get('file'), 'w')
+        f.write(request.POST.get('content'))
+        f.close()
+    return HttpResponse('ok')
 def getProtocol(request):
 	protocol = 'http://'
 	if request.is_secure() == True:
@@ -855,3 +882,8 @@ def manage_option(request):
 
 def getCurrTime():
 	return datetime.datetime.strftime(datetime.datetime.now(timeZone), '%Y-%m-%d %H:%M:%S')
+
+def test(request):
+    themeDir = request.POST.get('themeDir')
+    f = os.path.split(os.path.realpath(__file__))[0] + '/templates/' + themeDir + request.POST.get('file')
+    return HttpResponse(themeDir)
