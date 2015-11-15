@@ -4,7 +4,7 @@
 ### Supported frameworks
 
 #### Python
-  * Django
+  * [Django](https://github.com/kaysen820/Kblog/tree/master/django)
   * Flask
   * Webpy
 
@@ -26,5 +26,5 @@
 .....<br>
 
 ### Contacts
-  * Email: kaysen820 <at> gmail.com
+  * Email: kaysen820@gmail.com
 <br><br>
