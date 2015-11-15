@@ -1,5 +1,5 @@
 # Kblog
-<strong>The easy way to learn web frameworks</scrong>
+**The easy way to learn web frameworks**
 
 ### Supported frameworks
 
