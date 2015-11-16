@@ -8,7 +8,6 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^$', 'Kblog.views.index', name='home'),
-    url(r'^admin/', include(admin.site.urls)),
     url(r'^detail/', 'Kblog.views.detail', name='detail'),
     url(r'^signup/', 'Kblog.views.signup', name='signup'),
     url(r'^signin/', 'Kblog.views.signin', name='signin'),
@@ -16,28 +15,44 @@ urlpatterns = patterns('',
 	url(r'^logout/', 'Kblog.views.logout'),
 	url(r'^comment_post/', 'Kblog.views.comment_post'),
 	url(r'^checkaccount/', 'Kblog.views.checkaccount'),
+    #url(r'^admin/', include(admin.site.urls)),
+	
+    # admin
 	url(r'^manage/', 'Kblog.views.manage'),
-	url(r'^manage_article/', 'Kblog.views.manage_article'),
-	url(r'^manage_profile/', 'Kblog.views.manage_profile'),
-	url(r'^manage_write/', 'Kblog.views.manage_write'),
-	url(r'^manage_upload/', 'Kblog.views.manage_upload'),
-	url(r'^manage_editarticle/', 'Kblog.views.manage_editarticle'),
-	url(r'^manage_comment/', 'Kblog.views.manage_comment'),
-	url(r'^manage_delcomment/', 'Kblog.views.manage_delcomment'),
-	url(r'^manage_category/', 'Kblog.views.manage_category'),
-	url(r'^manage_addcategory/', 'Kblog.views.manage_addcategory'),
-	url(r'^manage_editcategory/', 'Kblog.views.manage_editcategory'),
-	url(r'^manage_delcategory/', 'Kblog.views.manage_delcategory'),
-	url(r'^manage_attachment/', 'Kblog.views.manage_attachment'),
-	url(r'^manage_user/', 'Kblog.views.manage_user'),
-	url(r'^manage_adduser/', 'Kblog.views.manage_adduser'),
-	url(r'^manage_edituser/', 'Kblog.views.manage_edituser'),
-	url(r'^manage_deluser/', 'Kblog.views.manage_deluser'),
-	url(r'^manage_themes/', 'Kblog.views.manage_themes'),
-	url(r'^manage_edittheme/', 'Kblog.views.manage_edittheme'),
-	url(r'^manage_delattachment/', 'Kblog.views.manage_delattachment'),
-	url(r'^manage_option/', 'Kblog.views.manage_option'),
-	url(r'^manage_uptheme/', 'Kblog.views.manage_uptheme'),
-	url(r'^manage_writefile/', 'Kblog.views.manage_writefile'),
-    url(r'^test/', 'Kblog.views.test'),
+
+	url(r'^manage_article/', 'Kblog.manages.article'),
+	url(r'^manage_article_write/', 'Kblog.manages.article_write'),
+	url(r'^manage_article_edit/', 'Kblog.manages.article_edit'),
+	url(r'^manage_article_delete/', 'Kblog.manages.article_delete'),
+	
+	url(r'^file_upload/', 'Kblog.manages.file_upload'),
+	url(r'^file_delete/', 'Kblog.manages.file_delete'),
+
+	url(r'^manage_comment/', 'Kblog.manages.comment'),
+	url(r'^manage_comment_delete/', 'Kblog.manages.comment_delete'),
+
+	url(r'^manage_category/', 'Kblog.manages.category'),
+	url(r'^manage_category_add/', 'Kblog.manages.category_add'),
+	url(r'^manage_category_edit/', 'Kblog.manages.category_edit'),
+	url(r'^manage_category_delete/', 'Kblog.manages.category_delete'),
+	
+
+	url(r'^manage_attachment/', 'Kblog.manages.attachment'),
+	url(r'^manage_attachment_delete/', 'Kblog.manages.attachment_delete'),
+
+	url(r'^manage_user/', 'Kblog.manages.user'),
+	url(r'^manage_user_add/', 'Kblog.manages.user_add'),
+	url(r'^manage_user_edit/', 'Kblog.manages.user_edit'),
+	url(r'^manage_user_delete/', 'Kblog.manages.user_delete'),
+	
+
+	url(r'^manage_themes/', 'Kblog.manages.themes'),
+	url(r'^manage_theme_edit/', 'Kblog.manages.theme_edit'),
+	url(r'^manage_theme_swich/', 'Kblog.manages.theme_swich'),
+	url(r'^manage_theme_changfile/', 'Kblog.manages.theme_changefile'),
+
+	url(r'^manage_profile/', 'Kblog.manages.profile'),
+	url(r'^manage_option/', 'Kblog.manages.option'),
+
+    url(r'^test/(\d+)/(\w+)/$', 'Kblog.manages.test'),
 )

@@ -28,7 +28,7 @@
 		{% endautoescape %}
 	</ul>
 
-	<form action="" method="POST" class="uk-form uk-form-stacked mt40">
+	<form action="/comment_post/" method="POST" class="uk-form uk-form-stacked mt40">
 		<h3 class="uk-h2 tm-article-subtitle" id="replyTit">发表评论</h3>
 		<div class="padding_10 clearfix ta_c">
 			<span class="mr30 fl"><label><img src="/static/images/avatars/avatar.png"><br /><input type="radio" name="avatar" value="avatar.png" checked="checked"></label></span>
@@ -58,6 +58,7 @@
 		<div class="uk-form-row">
 			<div class="uk-form-controls">
 				<input type="hidden" name="pid" id="pid" value="0">
+				<input type="hidden" name="aid" value="{{aid}}">
 				<button class="uk-button uk-button-primary">Submit</button>
 			</div>
 		</div>
