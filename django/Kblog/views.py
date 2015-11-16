@@ -208,10 +208,10 @@ def logout(request):
     if request.session.get('uInfo', False) != False:
         del request.session['uInfo']
     context = {
-        'themeHeader':getThemePath() + '/Public/header.html',
-        'themeFooter':getThemePath() + '/Public/footer.html'
+        'themeHeader':C.getThemePath() + '/Public/header.html',
+        'themeFooter':C.getThemePath() + '/Public/footer.html'
     }
-    return render(request, getThemePath() + 'logout.html', context)
+    return render(request, C.getThemePath() + 'logout.html', context)
 
 def getClientIp(request):
     if request.META.has_key('HTTP_X_FORWARDED_FOR'):  
@@ -238,5 +238,4 @@ def commentTree(data, pid, nested=False):
 			html += '</ul>'
 	return html
 
-def message(msg='', url=''):
-	return u"alert('" + msg + "');window.location.href='" + url + "';"
+
