@@ -1,0 +1,54 @@
+{% include 'manage/manage_header.html' %}
+
+	<div class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
+		<h3 class="tm-article-subtitle">管理分类</h3>
+		<input type="checkbox" id="chosenAll">
+		<div class="uk-button-group">
+			<button class="uk-button">选中项</button>
+			<div data-uk-dropdown="{mode:'click'}">
+				<button class="uk-button"><i class="uk-icon-caret-down"></i></button>
+				<div class="uk-dropdown uk-dropdown-small">
+					<ul class="uk-nav uk-nav-dropdown">
+						<li><a id="delFormBtn">删除</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<span>&nbsp;&nbsp;<a class="uk-button" href="/manage_category_add/">新增</a></span>
+		<span class="fr">
+			<form action="" method="GET">
+			<input type="text" placeholder="" name="word" />&nbsp;<button type="submit" class="uk-button"><i class="uk-icon-search"></i>搜索</button>&nbsp;
+			</form>
+		</span>
+		<table class="uk-table uk-table-hover uk-table-striped uk-table-condensed">
+			<tr>
+				<th width="5%"></th>
+				<th>名称</th>
+				<th>文章数</th>
+			</tr>
+
+			<form id="delForm" class="uk-form" method="POST" action="/manage_category_delete/">
+			{% if categoryList %}
+				{% for item in categoryList %}
+				<tr height="35">
+					<td><input type="checkbox" name="idlist" class="idlist" value="{{item.category_id}}" /></td>
+					<td><i class="uk-icon-arrows-v"></i>{{item.count|safe}}&nbsp;<a href="/manage_category_edit/?cid={{item.category_id}}">{{item.name}}</a></td>
+					<td>22</td>
+				</tr>
+				{% endfor %}
+			{% endif %}
+			{% csrf_token %}
+			</form>
+		</table>
+	</div>
+
+	<script>
+	$('#chosenAll').change(function(){
+		$('.idlist').prop('checked', $(this).is(':checked'));
+	});
+	$('#delFormBtn').click(function(){
+		$('#delForm').submit();
+	});
+	</script>
+</body>
+</html>

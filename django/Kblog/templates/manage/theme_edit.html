@@ -1,0 +1,34 @@
+{% include 'manage/manage_header.html' %}
+	<div class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
+		<h3 class="tm-article-subtitle">网站外观</h3>
+
+		<ul class="uk-tab">
+			<li><a href="/manage_themes/">更换外观</a></li>
+			<li class="uk-active"><a href="/manage_edittheme/">编辑当前外观</a></li>
+		</ul>
+
+		<form action="/manage_theme_changefile/" method="POST" class="uk-form">
+		<ul class="uk-switcher uk-margin" id="tab-content">
+			<li class="uk-active uk-grid">
+				<div class="uk-width-7-10 uk-align-left">
+					<textarea name="content" style="width:100%;height:500px">{{content}}</textarea>
+				</div>
+				<div class="uk-width-2-10 uk-align-left">
+					<h4 class="tm-article-subtitle">模板文件</h4>
+					<ul class="uk-nav uk-nav-side">
+						{% for value in fileList %}
+						<li {% if fileName == value %}class="uk-active"{% endif %}><a href="?file={{value}}">{{value}}</a></li>
+						{% endfor %}
+					</ul>
+				</div>
+			</li>
+		</ul>
+		<input type="hidden" name="file" value="{{fileName}}" />
+		<input type="hidden" name="themeDir" value="{{themeDir}}" />
+		<button class="uk-button uk-button-success" type="submit">保存</button>
+		{% csrf_token %}
+		</form>
+	</div>
+
+</body>
+</html>

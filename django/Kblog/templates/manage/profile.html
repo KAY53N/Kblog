@@ -1,0 +1,32 @@
+{% include 'manage/manage_header.html' %}
+
+	<div class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
+	<script>{{msg}}</script>
+		<h3 class="tm-article-subtitle">修改密码</h3>
+		<form class="uk-form uk-form-horizontal" method="POST" action="">
+			<div class="uk-form-row">
+				<label for="form-h-ip" class="uk-form-label">新密码</label>
+				<div class="uk-form-controls">
+					<input type="password" placeholder="Password input" id="form-h-ip" class="uk-form-width-medium" name="upwd">
+				</div>
+			</div>
+			<div class="uk-form-row">
+				<label for="form-h-ip" class="uk-form-label">确认新密码</label>
+				<div class="uk-form-controls">
+					<input type="password" placeholder="Password input" id="form-h-ip" class="uk-form-width-medium" name="repwd">
+				</div>
+			</div>
+
+			<div class="uk-form-row">
+				<label for="form-h-ip" class="uk-form-label"></label>
+				<div class="uk-form-controls">
+					<button type="submit" class="uk-button uk-button-success">提交</button>
+				</div>
+			</div>
+			{% csrf_token %}
+		</form>
+
+	</div>
+
+</body>
+</html>
