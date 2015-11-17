@@ -11,17 +11,17 @@ urlpatterns = patterns('',
     url(r'^detail/', 'Kblog.views.detail', name='detail'),
     url(r'^signup/', 'Kblog.views.signup', name='signup'),
     url(r'^signin/', 'Kblog.views.signin', name='signin'),
-	url(r'^code/', 'Kblog.views.code'),
-	url(r'^logout/', 'Kblog.views.logout'),
-	url(r'^comment_post/', 'Kblog.views.comment_post'),
-	url(r'^checkaccount/', 'Kblog.views.checkaccount'),
+    url(r'^code/', 'Kblog.views.code'),
+    url(r'^logout/', 'Kblog.views.logout'),
+    url(r'^comment_post/', 'Kblog.views.comment_post'),
+    url(r'^checkaccount/', 'Kblog.views.checkaccount'),
     #url(r'^admin/', include(admin.site.urls)),
-	
-    # admin
-	url(r'^manage/', 'Kblog.manages.manage'),
 
-	url(r'^manage_article/', 'Kblog.manages.article'),
-	url(r'^manage_article_write/', 'Kblog.manages.article_write'),
+    # admin
+    url(r'^manage/', 'Kblog.manages.manage'),
+
+    url(r'^manage_article/', 'Kblog.manages.article'),
+    url(r'^manage_article_write/', 'Kblog.manages.article_write'),
 	url(r'^manage_article_edit/', 'Kblog.manages.article_edit'),
 	url(r'^manage_article_delete/', 'Kblog.manages.article_delete'),
 	
