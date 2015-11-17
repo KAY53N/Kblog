@@ -53,5 +53,6 @@ urlpatterns = patterns('',
 	url(r'^manage_profile/', 'Kblog.manages.manage_profile'),
 	url(r'^manage_option/', 'Kblog.manages.manage_option'),
 
-    url(r'^test/', 'Kblog.manages.test'),
+    url(r'^test/', 'Kblog.manages.test')
 )
+
