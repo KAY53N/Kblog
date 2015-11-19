@@ -9,7 +9,7 @@ except ImportError:
 reload(sys)
 sys.setdefaultencoding('utf-8') 
 timeZone = pytz.timezone('Asia/Shanghai')
-
+categoryRes = False
 
 def isset(v): 
     try : 
@@ -25,9 +25,7 @@ def getThemePath():
 	return 'themes/' + currTheme.value + '/'
 
 def getWebInfo():
-    
-	detail = Options.objects.exclude(name__contains='theme')
-
+    detail = Options.objects.exclude(name__contains='theme')
     newDetail = {}
     for val in detail:
         newDetail[val.name] = val.value
@@ -38,8 +36,13 @@ def getNavList():
 	navList = Category.objects.filter(pid=0).all()
 	return navList
 
-
 def getCategoryList(countType='&nbsp;'):
+    global categoryRes
+    if categoryRes == False:
+		categoryRes = resetCategoryList(countType)
+    return categoryRes
+
+def resetCategoryList(countType):
 
 	sql = 'SELECT category_id,name,pid,path,path||\'-\'||category_id AS bpath FROM "' + Meta.db_table + '_category" ORDER BY bpath'
 
@@ -73,7 +76,8 @@ def checkLoginAdmin(userInfo):
 
 
 def getCurrTime():
-	return datetime.strftime(datetime.now(timeZone), '%Y-%m-%d %H:%M:%S')
+    global timeZone
+    return datetime.strftime(datetime.now(timeZone), '%Y-%m-%d %H:%M:%S')
 
 
 def getTheme():

@@ -608,7 +608,7 @@ def manage_option(request):
 
     return render(request, manageThemeDir + 'option.html', context)
 
-
 def test(request):
-    detail = User.objects.get(user_id=int(request.GET.get('uid')))
-    return HttpResponse(detail.username)
+    a = C.getTest()
+    b = C.getTest()
+    return HttpResponse(str(id(a)) + '<br>' + str(id(b)))

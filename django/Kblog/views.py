@@ -123,8 +123,7 @@ def detail(request):
 def comment_post(request):
 
     if request.method == 'POST':
-
-		userId     = 0
+        userId     = 0
         aid        = int(request.POST.get('aid', 0))
         upArticle  = Article.objects.get(article_id=aid)
         form       = CommentForm(request.POST)
@@ -136,8 +135,8 @@ def comment_post(request):
 
             status = Comment.objects.create(
 			    article_id  = aid,
-                status      = 'waiting'
-			    user_id     = int(userId),
+                status      = 'waiting',
+				user_id     = int(userId),
 			    ip          = getClientIp(request),
 			    pid         = int(request.POST.get('pid', 0)),
 			    agent       = request.META.get('HTTP_USER_AGENT', ''),
@@ -189,11 +188,11 @@ def signup(request):
 				return render(request, 'signup.html', {'error':'用户名已存在'})
 
 			User.objects.create(
-                status    = 1
+                status    = 1,
 				group     = 'subscriber',
 			    email     = cgi.escape(request.POST.get('email')),
 			    username  = cgi.escape(request.POST.get('username').lower()),
-                password  = make_password(cgi.escape(request.POST.get('upwd')), None, 'pbkdf2_sha256'),
+                password  = make_password(cgi.escape(request.POST.get('upwd')), None, 'pbkdf2_sha256')
 			)
 
 			return HttpResponse('Success')
@@ -205,11 +204,9 @@ def signup(request):
 	    return render(request, C.getThemePath() + 'signup.html', context)
 
 def signin(request):
-    
-	navList = C.getNavList()
+    navList = C.getNavList()
     url     = request.get_host()
-    
-	context = {}
+    context = {}
     context['themeHeader'] = C.getThemePath() + '/Public/header.html'
     context['themeFooter'] = C.getThemePath() + '/Public/footer.html'
 
@@ -286,5 +283,4 @@ def commentTree(data, pid, nested=False):
 			html += '</ul>'
 
 	return html
-
 
