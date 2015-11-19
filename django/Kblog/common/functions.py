@@ -10,6 +10,9 @@ reload(sys)
 sys.setdefaultencoding('utf-8') 
 timeZone = pytz.timezone('Asia/Shanghai')
 categoryRes = False
+webInfo = False
+navRes = False
+themeConfs = False
 
 def isset(v): 
     try : 
@@ -25,12 +28,24 @@ def getThemePath():
 	return 'themes/' + currTheme.value + '/'
 
 def getWebInfo():
+    global webInfo
+    if webInfo == False:
+        webInfo = resetWebInfo()
+    return webInfo
+
+def resetWebInfo():
     detail = Options.objects.exclude(name__contains='theme')
     newDetail = {}
     for val in detail:
         newDetail[val.name] = val.value
 
     return newDetail
+
+def getNavList():
+    global navRes
+    if navRes == False:
+        navRes = getNavList()
+	return navRes
 
 def getNavList():
 	navList = Category.objects.filter(pid=0).all()
@@ -84,8 +99,13 @@ def getTheme():
 	currTheme = Options.objects.get(name='theme')
 	return currTheme.value
 
-
 def getThemesConfig():
+    global themeConfs
+    if themeConfs == False:
+        themeConfs = scanThemesConfig()
+    return themeConfs
+
+def scanThemesConfig():
     index       = 0
     configList  = {}
     mydir       = os.path.split(os.path.realpath(__file__))[0] + '/../templates/themes/'

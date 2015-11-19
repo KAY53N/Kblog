@@ -29,47 +29,37 @@ def code(request):
 
 
 def index(request):
-	
-	url = request.get_host()
-	cid = request.GET.get('cid')
-	
-	if C.isset(cid) == 0:
-		cid = 0
+    url = request.get_host()
+    cid = request.GET.get('cid', 0)
+    navList = C.getNavList()
 
-	navList = C.getNavList()
-	
-	if request.method == 'POST':
+    if request.method == 'POST':
 		articleList = Article.objects.filter(title__icontains=cgi.escape(request.POST.get('word'))).order_by('-article_id')
-	
-	elif cid == 0:
+    elif cid == 0:
 		articleList = Article.objects.all().order_by('-article_id')
-	
-	else:
+    else:
 		sql = 'SELECT * FROM "' + Meta.db_table + '_article" AS article LEFT JOIN "' + Meta.db_table
 		sql += '_relation" AS relation ON article.article_id=relation.aid WHERE relation.cid=' + cgi.escape(cid)
 		#sql += " AND article.title LIKE '%%" + request.POST.get('word') + "%%'"
 		sql += ' ORDER BY article_id DESC'
 		articleList = Article.objects.raw(sql)
 		articleList = list(articleList)
+		
+    paginator  = Paginator(articleList, 5)
+    page       = int(request.GET.get('page', 1))
 	
-	paginator  = Paginator(articleList, 5)
-	page       = int(request.GET.get('page', 1))
-	
-	try:
+    try:
 		pagebar = paginator.page(page)
-
-	except PageNotAnInteger:
+    except PageNotAnInteger:
 		pagebar = paginator.page(1)
-
-	except EmptyPage:
+    except EmptyPage:
 		pagebar = paginator.page(paginator.num_pages)
-
-	categoryList  = C.getCategoryList()
-	userInfo      = request.session.get('uInfo', '')
-
-	contentDateList = Article.objects.order_by('created').values('created').distinct()
-
-	context = {
+		
+    categoryList     = C.getCategoryList()
+    userInfo         = request.session.get('uInfo', '')
+    contentDateList  = Article.objects.order_by('created').values('created').distinct()
+	
+    context = {
 		'url'              : url,
 		'pagebar'          : pagebar,
 		'navList'          : navList,
@@ -82,8 +72,7 @@ def index(request):
 		'themeHeader'      : C.getThemePath() + '/Public/header.html',
 		'themeFooter'      : C.getThemePath() + '/Public/footer.html'
 	}
-
-	return render(request, C.getThemePath() + 'index.html', context)
+    return render(request, C.getThemePath() + 'index.html', context)
 
 def detail(request):
 	
@@ -218,14 +207,14 @@ def signin(request):
 			return render(request, C.getThemePath() + 'signin.html', context)
 
         try:
-            userinfo  = User.objects.get(username=username)
+            userinfo  = User.objects.get(username=request.POST.get('username', '').lower())
             password  = cgi.escape(request.POST.get('upwd'))
             status    = check_password(password, userinfo.password)
-            username  = cgi.escape(request.POST.get('username').lower())
+            username  = cgi.escape(request.POST.get('username', '').lower())
         except:
             context['error'] = '用户名或密码错误'
             return render(request, C.getThemePath() + 'signin.html', context)
-
+		
         if status:
 			request.session['uInfo']             = {}
 			request.session['uInfo']['group']    = userinfo.group
