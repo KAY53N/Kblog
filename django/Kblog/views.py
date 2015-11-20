@@ -87,8 +87,8 @@ def detail(request):
 	
 	navList      = C.getNavList()
 	userInfo     = request.session.get('uInfo', '')
-	commentHtml  = commentTree(commentList, 0, False)
 	commentList  = Comment.objects.filter(article_id=aid)
+	commentHtml  = commentTree(commentList, 0, False)
 
 	del commentList
 
