@@ -27,37 +27,42 @@ def getThemePath():
 	currTheme = Options.objects.get(name='theme')
 	return 'themes/' + currTheme.value + '/'
 
+
 def getWebInfo():
     global webInfo
     if webInfo == False:
-        webInfo = resetWebInfo()
+        webInfo = retryGetWebInfo()
     return webInfo
 
-def resetWebInfo():
+
+def retryGetWebInfo():
     detail = Options.objects.exclude(name__contains='theme')
     newDetail = {}
     for val in detail:
         newDetail[val.name] = val.value
-
     return newDetail
+
 
 def getNavList():
     global navRes
     if navRes == False:
-        navRes = getNavList()
+        navRes = retryGetNavList()
 	return navRes
 
-def getNavList():
+
+def retryGetNavList():
 	navList = Category.objects.filter(pid=0).all()
 	return navList
+
 
 def getCategoryList(countType='&nbsp;'):
     global categoryRes
     if categoryRes == False:
-		categoryRes = resetCategoryList(countType)
+        categoryRes = retryGetCategoryList(countType)
     return categoryRes
 
-def resetCategoryList(countType):
+
+def retryGetCategoryList(countType):
 
 	sql = 'SELECT category_id,name,pid,path,path||\'-\'||category_id AS bpath FROM "' + Meta.db_table + '_category" ORDER BY bpath'
 
@@ -145,6 +150,7 @@ def getSizeInNiceString(sizeInBytes):
     else:
         bytes = '%.1f' % (sizeInBytes or 0,)
         return (bytes[:-2] if bytes.endswith('.0') else bytes) + ' bytes'
+
 
 def message(msg='', url=''):
 	return u"alert('" + msg + "');window.location.href='" + url + "';"
