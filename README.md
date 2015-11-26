@@ -2,11 +2,13 @@
 
 **The easy way to learn web frameworks**
 
-尝试多种开发语言和框架写博客系统
+尝试多种开发语言和框架写博客系统，目前已初步完成Django版本（不太优雅，不断改进中）
 
-统一使用数据库PostgreSQL
+所有代码在Linux服务器VIM下开发，统一使用数据库PostgreSQL，前端使用UIkit
 
-第一次用PHP之外语言写Web，也是第一次尝试使用此对象关系型数据库
+功能主要有：评论、文章、分类、附件、用户、切换主题、编辑主题等后台管理功能
+
+支持Markdown编辑文章，带进度条的Ajax上传文件，可自行开发主题
 
 #### Supported frameworks
 
