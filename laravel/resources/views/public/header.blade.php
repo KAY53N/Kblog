@@ -130,14 +130,20 @@
 			<a href="/" class="uk-navbar-brand uk-hidden-small"><img width="90" height="30" alt="UIkit" title="UIkit" src="http://www.getuikit.net/docs/images/logo_uikit.svg" class="uk-margin uk-margin-remove"></a>
 
 			<ul class="uk-navbar-nav uk-hidden-small">
-    		</ul>
+    	@if (isset($navList))
+        @foreach($navList as $item)
+          @if ($cid == $item['category_id'])<li class="uk-active">@else<li>@endif
+          <a href="/?cid=">{$item['name']}</a></li>
+        @endforeach
+      @endif
+      </ul>
 
 			<a data-uk-offcanvas="" class="uk-navbar-toggle uk-visible-small" href="#tm-offcanvas"></a>
 
 			<div class="uk-navbar-brand uk-navbar-center uk-visible-small"><img width="90" height="30" alt="UIkit" title="UIkit" src="/static/images/logo_uikit.svg"></div>
 
-	
-				<div class="fr f_white"> 你好！&nbsp;&nbsp;
+      @if (isset($userInfo))
+				<div class="fr f_white"> 你好！&nbsp;&nbsp;{{$userInfo['username']}}
 					<div class="uk-button-dropdown">
 						<button class="uk-button uk-button-primary uk-button-small">管理</button>
 						<div class="uk-dropdown uk-dropdown-small">
@@ -149,12 +155,12 @@
 					</div>
 					<a href="/logout/">退出</a>
 				</div>
-		
-			<div class="uk-button-group fr mt05">
-				<a href="/signin/" class="uk-button uk-button-danger">登陆</a>
-				<a href="/signup/" class="uk-button uk-button-danger">注册</a>
-			</div>
-		
+      @else
+  			<div class="uk-button-group fr mt05">
+  				<a href="/signin/" class="uk-button uk-button-danger">登陆</a>
+  				<a href="/signup/" class="uk-button uk-button-danger">注册</a>
+  			</div>
+		  @endif
 
 		</div>
 	</nav>
